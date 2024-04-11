@@ -22,6 +22,9 @@ https://clang.llvm.org/docs/LibASTMatchersTutorial.html#step-1-create-a-clangtoo
   The previous snippet shows that on MY system I have clang-17
   clang++-17. Modify these as appropriate.
 
+  You can run rebuildall but NOTE that it deletes ``b`` build
+  directory prior to executing cmake.
+
 ## RUNNING:
 
 ```
