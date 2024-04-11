@@ -46,6 +46,43 @@ public :
   }
 };
 
+/* m binaryOperator(hasOperatorName("=="), hasRHS(hasDescendant(declRefExpr(to(varDecl(hasName("pp"))))))) */
+/* Binding for "root": */
+/* BinaryOperator 0x562ae1b3afa0 </home/rgc/t/clang-ast/t.cpp:23:7, col:14> 'bool' '==' */
+/* |-UnaryOperator 0x562ae1b3aef8 <col:7, col:8> 'int *' prefix '&' cannot overflow */
+/* | `-DeclRefExpr 0x562ae1b3aed8 <col:8> 'int' lvalue Var 0x562ae1b1b6f0 'x' 'int' */
+/* `-ImplicitCastExpr 0x562ae1b3af88 <col:13, col:14> 'int *' <LValueToRValue> */
+/*   `-UnaryOperator 0x562ae1b3af70 <col:13, col:14> 'int *' lvalue prefix '*' cannot overflow */
+/*     `-ImplicitCastExpr 0x562ae1b3af58 <col:14> 'int **' <LValueToRValue> */
+/*       `-DeclRefExpr 0x562ae1b3af38 <col:14> 'int **' lvalue Var 0x562ae1b3ad68 'pp' 'int **' */
+
+/* m ifStmt(hasCondition(expr(binaryOperator(hasOperatorName("=="), hasRHS(hasDescendant(declRefExpr())))))) */
+/* m ifStmt(hasCondition(expr(binaryOperator(hasOperatorName("=="), hasRHS(hasDescendant(declRefExpr().bind("var"))))))) */
+/* Match #1: */
+
+/* /home/rgc/t/clang-ast/t.cpp:23:3: note: "root" binds here */
+/*    23 |   if (&x == *pp) */
+/*       |   ^~~~~~~~~~~~~~ */
+/*    24 |     offset2(x, x); */
+/*       |     ~~~~~~~~~~~~~ */
+/* /home/rgc/t/clang-ast/t.cpp:23:14: note: "var" binds here */
+/*    23 |   if (&x == *pp) */
+/*       |              ^~ */
+/* 1 match. */
+
+StatementMatcher IfMatcher =
+  ifStmt(hasCondition(expr(binaryOperator(hasOperatorName("=="), hasRHS(hasDescendant(declRefExpr().bind("varName")))))));
+
+class IfPrinter : public MatchFinder::MatchCallback {
+public :
+  virtual void run(const MatchFinder::MatchResult &Result) {
+    if (const auto *if_stmt = Result.Nodes.getNodeAs<DeclRefExpr>("varName")) {
+      const auto *valueDecl = if_stmt->getDecl();
+      llvm::outs() << "Variable name used in if comparision: " << valueDecl->getNameAsString() << "\n";
+    }
+  }
+};
+
 using namespace clang::tooling;
 using namespace llvm;
 
@@ -78,6 +115,9 @@ int main(int argc, const char **argv) {
 
   DeletePrinter Delete_Printer;
   Finder.addMatcher(DeleteMatcher, &Delete_Printer);
+
+  IfPrinter If_Printer;
+  Finder.addMatcher(IfMatcher, &If_Printer);
 
   return Tool.run(newFrontendActionFactory(&Finder).get());
 }
