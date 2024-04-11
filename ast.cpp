@@ -23,6 +23,19 @@ public :
   }
 };
 
+StatementMatcher DeleteMatcher =
+  cxxDeleteExpr(hasDescendant(declRefExpr().bind("varName")));
+
+class DeletePrinter : public MatchFinder::MatchCallback {
+public :
+  virtual void run(const MatchFinder::MatchResult &Result) {
+    if (const auto *delete_stmt = Result.Nodes.getNodeAs<DeclRefExpr>("varName")) {
+      const auto *valueDecl = delete_stmt->getDecl();
+      llvm::outs() << "Variable name used in delete: " << valueDecl->getNameAsString() << "\n";
+    }
+  }
+};
+
 using namespace clang::tooling;
 using namespace llvm;
 
@@ -52,6 +65,9 @@ int main(int argc, const char **argv) {
   LoopPrinter Printer;
   MatchFinder Finder;
   Finder.addMatcher(LoopMatcher, &Printer);
+
+  DeletePrinter Delete_Printer;
+  Finder.addMatcher(DeleteMatcher, &Delete_Printer);
 
   return Tool.run(newFrontendActionFactory(&Finder).get());
 }
