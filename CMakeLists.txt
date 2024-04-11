@@ -42,5 +42,3 @@ target_link_libraries(ast
   clangSerialization
   clangTooling
 )
-
-add_subdirectory(test)
