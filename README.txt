@@ -6,6 +6,9 @@ Use libclang to parse a C/C++ program and print the resulting AST.
 This is probably only useful to people working on tools based
 on libclang.
 
+This implements the sample code in:
+https://clang.llvm.org/docs/LibASTMatchersTutorial.html#step-1-create-a-clangtool
+
 ## BUILDING:
 
 - Install libclang.
