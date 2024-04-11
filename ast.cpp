@@ -23,6 +23,16 @@ public :
   }
 };
 
+/* Binding for "root": */
+/* CXXDeleteExpr 0x562ae1b3aeb8 </home/rgc/t/clang-ast/t.cpp:22:3, col:11> 'void' Function 0x562ae1b36560 'operator delete' 'void (void *) noexcept' */
+/* `-ImplicitCastExpr 0x562ae1b3aea0 <col:10, col:11> 'int *' <LValueToRValue> */
+/*   `-UnaryOperator 0x562ae1b3ae88 <col:10, col:11> 'int *' lvalue prefix '*' cannot overflow */
+/*     `-ImplicitCastExpr 0x562ae1b3ae70 <col:11> 'int **' <LValueToRValue> */
+/*       `-DeclRefExpr 0x562ae1b3ae50 <col:11> 'int **' lvalue Var 0x562ae1b3ad68 'pp' 'int **' */
+
+/* Binding for "varName": */
+/* DeclRefExpr 0x562ae1b3ae50 </home/rgc/t/clang-ast/t.cpp:22:11> 'int **' lvalue Var 0x562ae1b3ad68 'pp' 'int **' */
+
 StatementMatcher DeleteMatcher =
   cxxDeleteExpr(hasDescendant(declRefExpr().bind("varName")));
 
